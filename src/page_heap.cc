@@ -44,6 +44,11 @@
 #include "static_vars.h"       // for Static
 #include "system-alloc.h"      // for TCMalloc_SystemAlloc, etc
 
+
+#include "log_functions.h"
+
+
+
 DEFINE_double(tcmalloc_release_rate,
               EnvToDouble("TCMALLOC_RELEASE_RATE", 1.0),
               "Rate at which we release unused memory to the system.  "
@@ -150,6 +155,9 @@ Span* PageHeap::New(Length n) {
     if (result != NULL) return result;
   }
 
+   
+  if (logging::g_grow_heap)
+    logging::g_grow_heap();
   // Grow the heap and try again.
   if (!GrowHeap(n)) {
     ASSERT(stats_.unmapped_bytes+ stats_.committed_bytes==stats_.system_bytes);

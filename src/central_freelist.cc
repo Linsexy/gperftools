@@ -39,6 +39,8 @@
 #include "page_heap.h"         // for PageHeap
 #include "static_vars.h"       // for Static
 
+#include "log_functions.h"
+
 using std::min;
 using std::max;
 
@@ -245,6 +247,8 @@ void CentralFreeList::InsertRange(void *start, void *end, int N) {
 
 int CentralFreeList::RemoveRange(void **start, void **end, int N) {
   ASSERT(N > 0);
+  if (logging::g_central_lock)
+    logging::g_central_lock();
   lock_.Lock();
   if (N == Static::sizemap()->num_objects_to_move(size_class_) &&
       used_slots_ > 0) {
@@ -325,6 +329,8 @@ void CentralFreeList::Populate() {
 
   Span* span;
   {
+    if (logging::g_page_heap_lock)
+      logging::g_page_heap_lock();
     SpinLockHolder h(Static::pageheap_lock());
     span = Static::pageheap()->New(npages);
     if (span) Static::pageheap()->RegisterSizeClass(span, size_class_);

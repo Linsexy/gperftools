@@ -134,6 +134,7 @@
 #include "thread_cache.h"      // for ThreadCache
 
 #include "maybe_emergency_malloc.h"
+#include "log_functions.h"
 
 #if (defined(_WIN32) && !defined(__CYGWIN__) && !defined(__CYGWIN32__)) && !defined(WIN32_OVERRIDE_ALLOCATORS)
 # define WIN32_DO_PATCHING 1
@@ -1178,6 +1179,8 @@ static void* DoSampledAllocation(size_t size) {
   tmp.depth = GetStackTrace(tmp.stack, tcmalloc::kMaxStackDepth, 1);
   tmp.size = size;
 
+  if (logging::g_page_heap_lock)
+    logging::g_page_heap_lock();
   SpinLockHolder h(Static::pageheap_lock());
   // Allocate span
   Span *span = Static::pageheap()->New(tcmalloc::pages(size == 0 ? 1 : size));
@@ -1334,9 +1337,13 @@ static void* do_malloc_pages(ThreadCache* heap, size_t size) {
   if (heap->SampleAllocation(size)) {
     result = DoSampledAllocation(size);
 
+    if (logging::g_page_heap_lock)
+      logging::g_page_heap_lock();
     SpinLockHolder h(Static::pageheap_lock());
     report_large = should_report_large(num_pages);
   } else {
+    if (logging::g_page_heap_lock)
+      logging::g_page_heap_lock();
     SpinLockHolder h(Static::pageheap_lock());
     Span* span = Static::pageheap()->New(num_pages);
     result = (PREDICT_FALSE(span == NULL) ? NULL : SpanToMallocResult(span));
