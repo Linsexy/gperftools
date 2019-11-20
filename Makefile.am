@@ -470,6 +470,7 @@ libtcmalloc_minimal_internal_la_SOURCES = src/common.cc \
                                           $(SYSTEM_ALLOC_CC) \
                                           src/memfs_malloc.cc \
                                           src/central_freelist.cc \
+					  src/log_functions.cc \
                                           src/page_heap.cc \
                                           src/sampler.cc \
                                           src/span.cc \
