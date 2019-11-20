@@ -248,7 +248,7 @@ void CentralFreeList::InsertRange(void *start, void *end, int N) {
 int CentralFreeList::RemoveRange(void **start, void **end, int N) {
   ASSERT(N > 0);
   if (logging::g_central_lock)
-    logging::g_central_lock();
+    logging::g_central_lock(size_class_);
   lock_.Lock();
   if (N == Static::sizemap()->num_objects_to_move(size_class_) &&
       used_slots_ > 0) {

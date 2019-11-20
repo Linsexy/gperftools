@@ -5,7 +5,7 @@
 
 namespace logging
 {
-  extern std::function<void()> g_central_lock;
+  extern std::function<void(size_t)> g_central_lock;
   extern std::function<void()> g_page_heap_lock;
   extern std::function<void()> g_grow_heap;
 }
